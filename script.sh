@@ -15,9 +15,9 @@ if mvn clean verify sonar:sonar -Dsonar.projectKey=springboot  \
  -Dsonar.token=$SONAR_TOKEN 
 then
 echo "SCAN SUCCESS"
-return 0
+exit 0
 else
-return 1
+exit 1
 fi
 }
 function clean(){
@@ -28,14 +28,16 @@ function check_space(){
      if [ $AVALIABLE_SPACE -le $CHECK_SPACE ]
      then
      echo "no space to deploy"
-     return 1
+     exit 1
      else
      echo "sufficient space to deploy"
-     return 0
+     exit 0
      fi
 }
 function rollback(){
 echo "rolling back"
+docker rm -f app
+docker run -itd --name app -p 80:8080 springboot:$OLD_TAG
 }
 function deploy(){
     if [ -f /home/ec2-user/lock ]
@@ -43,12 +45,12 @@ function deploy(){
     sleep 10
     echo "waiting for lock to release"
     deploy
-
     else
     touch /home/ec2-user/lock
     TAG=$(git rev-parse HEAD|cut -b 1-9)
     docker build -t springboot:$TAG .
     docker rm -f app
+    export OLD_TAG=$(docker ps|grep app|awk '{print $2}')
     docker run -itd --name app -p 80:8080 springboot:$TAG
     export HOST=$(curl ifconfig.me)
     fi
