@@ -49,11 +49,10 @@ function deploy(){
     touch /home/ec2-user/lock
     TAG=$(git rev-parse HEAD|cut -b 1-9)
     docker build -t springboot:$TAG .
-    docker rm -f app
     export OLD_TAG=$(docker ps -a |grep app|awk '{print $2}')
-    docker ps -a 
-    echo "docker cmd"
     echo "old tag is $OLD_TAG"
+    docker rm -f app
+    echo "docker cmd"
     docker run -itd --name app -p 80:8080 springboot:$TAG
     export HOST=$(curl ifconfig.me)
     curl ifconfig.me
