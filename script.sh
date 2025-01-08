@@ -47,4 +47,3 @@ function SanityCheck()
     curl localhost:80
 }
 $1
-clean
