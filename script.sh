@@ -51,6 +51,7 @@ function deploy(){
     docker build -t springboot:$TAG .
     docker rm -f app
     export OLD_TAG=$(docker ps|grep app|awk '{print $2}')
+    echo "old tag is $OLD_TAG"
     docker run -itd --name app -p 80:8080 springboot:$TAG
     export HOST=$(curl ifconfig.me)
     fi
@@ -59,6 +60,6 @@ function deploy(){
 
 function SanityCheck()
 {
-    curl localhost:80
+   curl -X GET $(curl ifconfig.me) -v 2>&1|grep  "200"
 }
 $1
