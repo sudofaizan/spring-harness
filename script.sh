@@ -12,7 +12,7 @@ function clean(){
 function scan(){
 if mvn clean verify sonar:sonar -Dsonar.projectKey=springboot  \
  -Dsonar.projectName='springboot' -Dsonar.host.url=http://$SONAR_HOST \
- -Dsonar.token=$SONAR_TOKEN >scan.log
+ -Dsonar.token=$SONAR_TOKEN 
 then
 echo "SCAN SUCCESS"
 return 0
