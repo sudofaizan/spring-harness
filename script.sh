@@ -50,10 +50,10 @@ function deploy(){
     TAG=$(git rev-parse HEAD|cut -b 1-9)
     docker build -t springboot:$TAG .
     docker rm -f app
-    export OLD_TAG=`git rev-parse HEAD~2|cut -b 1-9)`
+    export OLD_TAG=$(git rev-parse HEAD~2|cut -b 1-9)
     echo "old tag is $OLD_TAG"
     docker run -itd --name app -p 80:8080 springboot:$TAG
-    export HOST=`curl ifconfig.me`
+    export HOST=$(curl ifconfig.me)
 
     fi
     rm /home/ec2-user/lock
