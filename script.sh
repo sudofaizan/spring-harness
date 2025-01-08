@@ -34,18 +34,23 @@ function check_space(){
      return 0
      fi
 }
+function rollback(){
+echo "rolling back"
+}
 function deploy(){
     if [ -f /home/ec2-user/lock ]
     then
     sleep 10
+    echo "waiting for lock to release"
     deploy
+
     else
     touch /home/ec2-user/lock
     TAG=$(git rev-parse HEAD|cut -b 1-9)
     docker build -t springboot:$TAG .
     docker rm -f app
     docker run -itd --name app -p 80:8080 springboot:$TAG
-    EXPORT HOST=$(curl ifconfig.me)
+    export HOST=$(curl ifconfig.me)
     fi
     rm /home/ec2-user/lock
 }
