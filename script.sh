@@ -6,6 +6,9 @@ curl -X GET "$1" \
 -H "Authorization: Bearer $SONAR_TOKEN"|jq -r '.task.status'
 
 }
+function clean(){
+    rm -rf  rm -rf /home/ec2-user/*
+}
 function scan(){
 if mvn clean verify sonar:sonar -Dsonar.projectKey=springboot  \
  -Dsonar.projectName='springboot' -Dsonar.host.url=http://$SONAR_HOST \
@@ -44,3 +47,4 @@ function SanityCheck()
     curl localhost:80
 }
 $1
+clean
