@@ -39,6 +39,7 @@ touch lock
     docker build -t springboot:v1 .
     docker rm -f app
     docker run -itd --name app -p 80:8080 springboot:v1
+    EXPORT HOST=$(curl ifconfig.me)
 rm lock
 }
 
