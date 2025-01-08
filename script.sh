@@ -35,12 +35,19 @@ function check_space(){
      fi
 }
 function deploy(){
-touch lock
-    docker build -t springboot:v1 .
+    if [ -f /home/ec2-user/lock ]
+    then
+    sleep 10
+    deploy
+    else
+    touch /home/ec2-user/lock
+    TAG=$(git rev-parse HEAD|cut -b 1-9)
+    docker build -t springboot:$TAG .
     docker rm -f app
-    docker run -itd --name app -p 80:8080 springboot:v1
+    docker run -itd --name app -p 80:8080 springboot:$TAG
     EXPORT HOST=$(curl ifconfig.me)
-rm lock
+    fi
+    rm /home/ec2-user/lock
 }
 
 function SanityCheck()
