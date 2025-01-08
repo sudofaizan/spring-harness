@@ -60,6 +60,12 @@ function deploy(){
 
 function SanityCheck()
 {
-   curl -X GET $(curl ifconfig.me) -v 2>&1|grep  "200"
+   if curl -X GET $(curl ifconfig.me) -v 2>&1|grep  "200"
+   then
+   exit 0
+   else 
+   exit 1
+   fi
+
 }
 $1
