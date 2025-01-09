@@ -1,0 +1,317 @@
+pipeline:
+  name: testpipeline
+  identifier: testpipeline
+  projectIdentifier: myapp
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: checkout
+        identifier: checkout
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  type: ShellScript
+                  name: ShellScript_1
+                  identifier: ShellScript_1
+                  spec:
+                    shell: Bash
+                    executionTarget:
+                      host: 44.220.159.245
+                      connectorRef: testsshnew
+                      workingDirectory: " /home/ec2-user"
+                    source:
+                      type: Inline
+                      spec:
+                        script: |-
+                          if ls /home/ec2-user/spring-harness
+                          then
+                          cd /home/ec2-user/spring-harness && git pull origin main
+                          else
+                          git clone $REPO_URL
+                          fi
+                    environmentVariables:
+                      - name: REPO_URL
+                        type: String
+                        value: https://github.com/sudofaizan/spring-harness.git
+                      - name: SONAR_TOKEN
+                        type: String
+                        value: sqp_72ad0c2d6ab6cd44f2d26c9859f91258bbd17613
+                      - name: SONAR_HOST
+                        type: String
+                        value: 98.81.243.26
+                    outputVariables: []
+                  timeout: 10m
+        tags: {}
+    - stage:
+        name: CodeScan
+        identifier: CodeScan
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  type: ShellScript
+                  name: ShellScript_1
+                  identifier: ShellScript_1
+                  spec:
+                    shell: Bash
+                    executionTarget:
+                      host: 44.220.159.245
+                      connectorRef: testsshnew
+                      workingDirectory: /home/ec2-user/spring-harness
+                    source:
+                      type: Inline
+                      spec:
+                        script: bash script.sh scan
+                    environmentVariables:
+                      - name: SONAR_TOKEN
+                        type: String
+                        value: sqp_72ad0c2d6ab6cd44f2d26c9859f91258bbd17613
+                      - name: SONAR_HOST
+                        type: String
+                        value: 98.81.243.26
+                    outputVariables: []
+                  timeout: 10m
+        tags: {}
+    - stage:
+        name: Pre-Check
+        identifier: PreCheck
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  type: ShellScript
+                  name: ShellScript_1
+                  identifier: ShellScript_1
+                  spec:
+                    shell: Bash
+                    executionTarget:
+                      host: 44.220.159.245
+                      connectorRef: testsshnew
+                      workingDirectory: /home/ec2-user/spring-harness
+                    source:
+                      type: Inline
+                      spec:
+                        script: bash script.sh check_space
+                    environmentVariables:
+                      - name: CHECK_SPACE
+                        type: Number
+                        value: "2"
+                    outputVariables: []
+                  timeout: 10m
+        tags: {}
+    - stage:
+        name: approval for Deploy
+        identifier: approval_for_Deploy
+        description: ""
+        type: Approval
+        spec:
+          execution:
+            steps:
+              - step:
+                  name: approve
+                  identifier: approve
+                  type: HarnessApproval
+                  timeout: 1d
+                  spec:
+                    approvalMessage: |-
+                      Please review the following information
+                      and approve the pipeline progression
+                    includePipelineExecutionHistory: true
+                    approvers:
+                      minimumCount: 1
+                      disallowPipelineExecutor: false
+                      userGroups:
+                        - account._account_all_users
+                    isAutoRejectEnabled: false
+                    approverInputs: []
+        tags: {}
+    - stage:
+        name: deploy
+        identifier: deploy
+        description: ""
+        type: Deployment
+        spec:
+          deploymentType: Ssh
+          service:
+            serviceRef: namesvc
+          environment:
+            environmentRef: myenv
+            deployToAll: false
+            infrastructureDefinitions:
+              - identifier: myinfra
+          execution:
+            steps:
+              - step:
+                  type: Command
+                  name: Deploy
+                  identifier: Command_1
+                  spec:
+                    onDelegate: false
+                    environmentVariables: []
+                    outputVariables: []
+                    commandUnits:
+                      - identifier: deploy
+                        name: deploy
+                        type: Script
+                        spec:
+                          workingDirectory: /home/ec2-user/spring-harness
+                          shell: Bash
+                          source:
+                            type: Inline
+                            spec:
+                              script: bash script.sh deploy
+                  timeout: 10m
+                  strategy:
+                    repeat:
+                      items:
+                        - 44.220.159.245
+              - step:
+                  type: Wait
+                  name: Wait_1
+                  identifier: Wait_1
+                  spec:
+                    duration: 10s
+              - step:
+                  type: Command
+                  name: Liveness
+                  identifier: Liveness
+                  spec:
+                    onDelegate: false
+                    environmentVariables: []
+                    outputVariables: []
+                    commandUnits:
+                      - identifier: LIVENESS
+                        name: LIVENESS
+                        type: Script
+                        spec:
+                          workingDirectory: /home/ec2-user/spring-harness
+                          shell: Bash
+                          source:
+                            type: Inline
+                            spec:
+                              script: bash script.sh SanityCheck
+                  timeout: 10m
+                  strategy:
+                    repeat:
+                      items:
+                        - 44.220.159.245:80
+            rollbackSteps:
+              - step:
+                  type: Command
+                  name: rollback
+                  identifier: Command_1
+                  spec:
+                    onDelegate: false
+                    environmentVariables: []
+                    outputVariables: []
+                    commandUnits:
+                      - identifier: rollback_the_changes
+                        name: rollback the changes
+                        type: Script
+                        spec:
+                          workingDirectory: /home/ec2-user/spring-harness
+                          shell: Bash
+                          source:
+                            type: Inline
+                            spec:
+                              script: bash script.sh rollback
+                  timeout: 10m
+                  strategy:
+                    repeat:
+                      items:
+                        - 44.220.159.245
+              - step:
+                  type: Wait
+                  name: Wait_1
+                  identifier: Wait_1
+                  spec:
+                    duration: 10s
+              - step:
+                  type: Command
+                  name: Command_2
+                  identifier: Command_2
+                  spec:
+                    onDelegate: false
+                    environmentVariables: []
+                    outputVariables: []
+                    commandUnits:
+                      - identifier: liveness
+                        name: liveness
+                        type: Script
+                        spec:
+                          workingDirectory: /home/ec2-user/spring-harness
+                          shell: Bash
+                          source:
+                            type: Inline
+                            spec:
+                              script: bash script.sh SanityCheck
+                  timeout: 10m
+                  strategy:
+                    repeat:
+                      items:
+                        - 44.220.159.245:80
+        tags: {}
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: StageRollback
+    - stage:
+        name: Sanity check
+        identifier: Sanity_check
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  type: ShellScript
+                  name: ShellScript_1
+                  identifier: ShellScript_1
+                  spec:
+                    shell: Bash
+                    executionTarget:
+                      host: 44.220.159.245
+                      connectorRef: testsshnew
+                      workingDirectory: /home/ec2-user/spring-harness
+                    source:
+                      type: Inline
+                      spec:
+                        script: bash script.sh SanityCheck
+                    environmentVariables: []
+                    outputVariables: []
+                  timeout: 10m
+        tags: {}
+    - stage:
+        name: notify
+        identifier: notify
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  type: Email
+                  name: Email_1
+                  identifier: Email_1
+                  spec:
+                    to: faizii.official@gmail.com
+                    cc: ""
+                    subject: Success deploy
+                    body: |-
+                      your deployment of x version is success
+                      Regards
+                      pipeline
+                  timeout: 10m
+        tags: {}
+  delegateSelectors:
+    - docker-delegate
