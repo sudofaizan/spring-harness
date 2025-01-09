@@ -3,7 +3,7 @@
 
 function result(){
 curl -X GET "$1" \
--H "Authorization: Bearer $SONAR_TOKEN"|jq -r '.task.status'
+-H "Authorization: Bearer $SQ_TOKEN"|jq -r '.task.status'
 
 }
 function clean(){
@@ -12,7 +12,7 @@ function clean(){
 function scan(){
 if mvn clean verify sonar:sonar -Dsonar.projectKey=springboot  \
  -Dsonar.projectName='springboot' -Dsonar.host.url=http://$SONAR_HOST \
- -Dsonar.token=$SONAR_TOKEN 
+ -Dsonar.token=$SQ_TOKEN 
 then
 echo "SCAN SUCCESS"
 exit 0

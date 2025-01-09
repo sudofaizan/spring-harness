@@ -37,7 +37,7 @@ pipeline:
                       - name: REPO_URL
                         type: String
                         value: https://github.com/sudofaizan/spring-harness.git
-                      - name: SONAR_TOKEN
+                      - name: SQ_TOKEN
                         type: String
                         value: sqp_72ad0c2d6ab6cd44f2d26c9859f91258bbd17613
                       - name: SONAR_HOST
@@ -69,7 +69,7 @@ pipeline:
                       spec:
                         script: bash script.sh scan
                     environmentVariables:
-                      - name: SONAR_TOKEN
+                      - name: SQ_TOKEN
                         type: String
                         value: sqp_72ad0c2d6ab6cd44f2d26c9859f91258bbd17613
                       - name: SONAR_HOST
