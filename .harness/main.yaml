@@ -4,22 +4,6 @@ pipeline:
   projectIdentifier: myapp
   orgIdentifier: default
   tags: {}
-  trigger:
-    pipelineBranchName: main
-    name: ghtrigger
-    identifier: ghtrigger
-    description: ""
-    orgIdentifier: default
-    projectIdentifier: myapp
-    pipelineIdentifier: main
-    source:
-      type: GitHub
-      spec:
-        type: Webhook
-        spec:
-          connectorRef: account.sudofaizan
-          repoName: spring-harness
-          branch: main
   stages:
     - stage:
         name: checkout
