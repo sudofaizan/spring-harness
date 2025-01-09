@@ -7,27 +7,18 @@ pipeline:
   trigger:
     name: ghtrigger
     identifier: ghtrigger
-    enabled: true
-    encryptedWebhookSecretIdentifier: account.sudofaizan-ght
     description: ""
-    tags: {}
     orgIdentifier: default
-    stagesToExecute: []
     projectIdentifier: myapp
     pipelineIdentifier: main
     source:
-      type: Webhook
+      type: GitHub
       spec:
-        type: Github
+        type: Webhook
         spec:
-          type: Push
-          spec:
-            connectorRef: account.sudofaizan
-            autoAbortPreviousExecutions: false
-            payloadConditions: []
-            headerConditions: []
-            repoName: spring-harness
-            actions: []
+          connectorRef: account.sudofaizan
+          repoName: spring-harness
+          branch: main
   stages:
     - stage:
         name: checkout
