@@ -5,6 +5,7 @@ pipeline:
   orgIdentifier: default
   tags: {}
   trigger:
+    pipelineBranchName: main
     name: ghtrigger
     identifier: ghtrigger
     description: ""
