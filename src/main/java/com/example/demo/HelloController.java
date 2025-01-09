@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class HelloController {
     @GetMapping("/")
     public String helloWorld() {
-        return "Hello, World! v2.2.9";
+        return "Hello, World! v2.2.2";
     }
 }
 
