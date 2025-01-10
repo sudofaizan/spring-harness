@@ -22,7 +22,7 @@ pipeline:
                     executionTarget:
                       host: 3.84.50.42
                       connectorRef: testsshnew
-                      workingDirectory: " /home/ec2-user"
+                      workingDirectory: /home/ec2-user
                     source:
                       type: Inline
                       spec:
@@ -37,12 +37,6 @@ pipeline:
                       - name: REPO_URL
                         type: String
                         value: https://github.com/sudofaizan/spring-harness.git
-                      - name: SQ_TOKEN
-                        type: Secret
-                        value: SQ_TOKEN
-                      - name: SONAR_HOST
-                        type: String
-                        value: 98.81.243.26
                     outputVariables: []
                   timeout: 10m
         tags: {}
