@@ -61,7 +61,9 @@ pipeline:
                     source:
                       type: Inline
                       spec:
-                        script: bash script.sh scan
+                        script: |-
+                          # bash script.sh scan
+                          bash script.sh CreateCR
                     environmentVariables:
                       - name: SQ_TOKEN
                         type: Secret
