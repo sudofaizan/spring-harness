@@ -58,7 +58,7 @@ pipeline:
                     source:
                       type: Inline
                       spec:
-                        script: bash script.sh CreateCR
+                        script: echo $JIRA_TOKEN && bash script.sh CreateCR
                     environmentVariables:
                       - name: JIRA_HOST
                         type: String
