@@ -72,4 +72,107 @@ function SanityCheck()
    fi
 
 }
-$1
+function GetChanges(){
+   export CHANGES="https://github.com/sudofaizan/spring-harness/commit/$(git rev-parse HEAD)"
+   echo $CHANGES >/tmp/CHANGES
+}
+function CreateCR(){
+    if [ -z "$JIRA_TOKEN" ]; then
+        echo "Error: No token found."
+        return 1
+    fi
+    if [ -z "$JIRA_HOST" ]; then
+        echo "Error: No Host jira found."
+        return 1
+    fi
+    curl -s -X POST \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $JIRA_TOKEN" \
+    -d '{
+        "fields": {
+            "project": {
+                "key": "HAR"
+            },
+            "summary": "Change Request for new feature ",
+            "description": "This is a change request ticket for implementing a new feature in the system '"$(cat /tmp/CHANGES)"'.",
+            "issuetype": {
+                "name": "Task"
+            }
+        }
+    }' \
+    "$JIRA_HOST/rest/api/2/issue" |jq -r ".key"
+}
+function GetCR(){
+    local issueKey=$1
+    if [ -z "$issueKey" ]; then
+        echo "Error: Issue key is required as an argument."
+        return 1
+    fi
+    if [ -z "$JIRA_TOKEN" ]; then
+        echo "Error: No token found."
+        return 1
+    fi
+    if [ -z "$JIRA_HOST" ]; then
+        echo "Error: No Host jira found."
+        return 1
+    fi
+
+    curl -s -X GET \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $JIRA_TOKEN" \
+    "$JIRA_HOST/rest/api/2/issue/$issueKey" |jq -r '.fields.status.name'
+}
+function CloseCR() {
+    local issueKey=$1
+    if [ -z "$issueKey" ]; then
+        echo "Error: Issue key is required as an argument."
+        return 1
+    fi
+    if [ -z "$JIRA_TOKEN" ]; then
+        echo "Error: No token found."
+        return 1
+    fi
+    if [ -z "$JIRA_HOST" ]; then
+        echo "Error: No Host jira found."
+        return 1
+    fi
+
+    curl  -s -X POST \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer $JIRA_TOKEN" \
+      -d '{
+        "transition": {
+          "id": "21"
+        },
+        "update": {
+            "comment": [
+                {
+                    "add": {
+                        "body": "Closing the issue as the request has been completed."
+                    }
+                }
+            ]
+        }
+      }' \
+      "$JIRA_HOST/rest/api/2/issue/$issueKey/transitions"
+}
+function DeleteCR(){
+    local issueKey=$1
+    if [ -z "$issueKey" ]; then
+        echo "Error: Issue key is required as an argument."
+        return 1
+    fi
+    if [ -z "$JIRA_TOKEN" ]; then
+        echo "Error: No token found."
+        return 1
+    fi
+    if [ -z "$JIRA_HOST" ]; then
+        echo "Error: No Host jira found."
+        return 1
+    fi
+        curl -s -X DELETE \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer $JIRA_TOKEN" \
+        "$JIRA_HOST/rest/api/2/issue/$issueKey"
+}
+$1 $2

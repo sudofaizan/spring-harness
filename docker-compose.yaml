@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  jira:
+    image: atlassian/jira-software:latest
+    container_name: jira
+    environment:
+      - ATL_JIRA_HOME=/var/atlassian/application-data/jira
+      - ATLASSIAN_JIRA_CONTEXT_PATH=/
+      - JDBC_URL=jdbc:mysql://db:3306/jiradb
+      - JDBC_USER=jiradbuser
+      - JDBC_PASSWORD=jiradbpwd
+    ports:
+      - "8080:8080"
+    volumes:
+      - jira_data:/var/atlassian/application-data/jira
+    networks:
+      - jira_network
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: jira_db
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=jiradb
+      - MYSQL_USER=jiradbuser
+      - MYSQL_PASSWORD=jiradbpwd
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - jira_network
+    restart: unless-stopped
+
+volumes:
+  jira_data:
+  mysql_data:
+
+networks:
+  jira_network:
+    driver: bridge
