@@ -101,7 +101,6 @@ function CreateCR(){
         }
     }' \
     "$JIRA_HOST/rest/api/2/issue" |jq -r ".key"
-    
 }
 function GetCR(){
     local issueKey=$1
