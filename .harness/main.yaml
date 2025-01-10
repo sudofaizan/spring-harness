@@ -20,7 +20,7 @@ pipeline:
                   spec:
                     shell: Bash
                     executionTarget:
-                      host: 44.220.159.245
+                      host: 3.84.50.42
                       connectorRef: testsshnew
                       workingDirectory: " /home/ec2-user"
                     source:
@@ -61,7 +61,7 @@ pipeline:
                   spec:
                     shell: Bash
                     executionTarget:
-                      host: 44.220.159.245
+                      host: 3.84.50.42
                       connectorRef: testsshnew
                       workingDirectory: /home/ec2-user/spring-harness
                     source:
@@ -93,7 +93,7 @@ pipeline:
                   spec:
                     shell: Bash
                     executionTarget:
-                      host: 44.220.159.245
+                      host: 3.84.50.42
                       connectorRef: testsshnew
                       workingDirectory: /home/ec2-user/spring-harness
                     source:
@@ -172,7 +172,7 @@ pipeline:
                   strategy:
                     repeat:
                       items:
-                        - 44.220.159.245
+                        - 3.84.50.42
               - step:
                   type: Wait
                   name: Wait_1
@@ -202,7 +202,7 @@ pipeline:
                   strategy:
                     repeat:
                       items:
-                        - 44.220.159.245:80
+                        - 3.84.50.42:80
             rollbackSteps:
               - step:
                   type: Command
@@ -227,7 +227,7 @@ pipeline:
                   strategy:
                     repeat:
                       items:
-                        - 44.220.159.245
+                        - 3.84.50.42
               - step:
                   type: Wait
                   name: Wait_1
@@ -257,7 +257,7 @@ pipeline:
                   strategy:
                     repeat:
                       items:
-                        - 44.220.159.245:80
+                        - 3.84.50.42:80
         tags: {}
         failureStrategies:
           - onFailure:
@@ -280,7 +280,7 @@ pipeline:
                   spec:
                     shell: Bash
                     executionTarget:
-                      host: 44.220.159.245
+                      host: 3.84.50.42
                       connectorRef: testsshnew
                       workingDirectory: /home/ec2-user/spring-harness
                     source:
