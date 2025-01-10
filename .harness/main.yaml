@@ -41,6 +41,35 @@ pipeline:
                   timeout: 10m
         tags: {}
     - stage:
+        name: CreateCR
+        identifier: CreateCR
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  type: ShellScript
+                  name: CreateCR
+                  identifier: CreateCR
+                  spec:
+                    shell: Bash
+                    executionTarget: {}
+                    source:
+                      type: Inline
+                      spec:
+                        script: bash script.sh CreateCR
+                    environmentVariables:
+                      - name: JIRA_HOST
+                        type: String
+                        value: http://jira:8080
+                      - name: JIRA_TOKEN
+                        type: String
+                        value: NTI3MzExMjI5MDQ3OpKiYpXadr0dYvaHqaOqwS2cxrA0
+                    outputVariables: []
+                  timeout: 10m
+        tags: {}
+    - stage:
         name: CodeScan
         identifier: CodeScan
         description: ""
