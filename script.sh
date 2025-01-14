@@ -10,8 +10,8 @@ function clean(){
     rm -rf  rm -rf /home/ec2-user/*
 }
 function scan(){
-if mvn clean verify sonar:sonar -Dsonar.projectKey=springboot  \
- -Dsonar.projectName='springboot' -Dsonar.host.url=http://$SONAR_HOST \
+if mvn clean verify sonar:sonar -Dsonar.projectKey=scanner  \
+ -Dsonar.projectName='scanner' -Dsonar.host.url=http://$SONAR_HOST \
  -Dsonar.token=$SQ_TOKEN 
 then
 echo "SCAN SUCCESS"
