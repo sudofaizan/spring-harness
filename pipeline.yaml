@@ -1,0 +1,292 @@
+pipeline:
+  name: MAIN-V2
+  identifier: MAINV2
+  projectIdentifier: myapp
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: CD
+        identifier: PIPELINE
+        description: ""
+        type: Deployment
+        spec:
+          deploymentType: Ssh
+          service:
+            serviceRef: namesvc
+          environment:
+            environmentRef: myenv
+            deployToAll: false
+            infrastructureDefinitions:
+              - identifier: myinfra
+          execution:
+            steps:
+              - step:
+                  type: ShellScript
+                  name: Checkout
+                  identifier: ShellScript_1
+                  spec:
+                    shell: Bash
+                    executionTarget:
+                      host: <+input>
+                      connectorRef: testsshnew
+                      workingDirectory: <+input>
+                    source:
+                      type: Inline
+                      spec:
+                        script: |-
+                          # ls djhskdh
+                          if ls /home/ec2-user/APP 
+                          then
+                          cd /home/ec2-user/APP && git pull origin main --rebase
+                          else
+                          git clone $GITHUB_REPO APP
+                          fi
+                    environmentVariables:
+                      - name: GITHUB_REPO
+                        type: String
+                        value: <+input>
+                    outputVariables: []
+                    delegateSelectors:
+                      - docker-delegate
+                  timeout: 10m
+              - step:
+                  type: ShellScript
+                  name: CodeScan
+                  identifier: CodeScan
+                  spec:
+                    shell: Bash
+                    executionTarget:
+                      host: <+input>
+                      connectorRef: testsshnew
+                      workingDirectory: /home/ec2-user/APP
+                    source:
+                      type: Inline
+                      spec:
+                        script: bash script.sh scan
+                    outputVariables: []
+                    environmentVariables:
+                      - name: SQ_TOKEN
+                        type: Secret
+                        value: SQ_TOKEN
+                      - name: SONAR_HOST
+                        type: String
+                        value: <+input>
+                  timeout: 10m
+              - step:
+                  type: ShellScript
+                  name: Space_check
+                  identifier: Space_check
+                  spec:
+                    shell: Bash
+                    executionTarget:
+                      host: <+input>
+                      connectorRef: testsshnew
+                      workingDirectory: /home/ec2-user/APP
+                    source:
+                      type: Inline
+                      spec:
+                        script: bash script.sh check_space
+                    outputVariables: []
+                    environmentVariables:
+                      - name: CHECK_SPACE
+                        type: String
+                        value: <+input>
+                  timeout: 10m
+              - step:
+                  type: ShellScript
+                  name: build
+                  identifier: build
+                  spec:
+                    shell: Bash
+                    executionTarget:
+                      host: <+input>
+                      connectorRef: testsshnew
+                      workingDirectory: /home/ec2-user/APP
+                    source:
+                      type: Inline
+                      spec:
+                        script: docker build -t $IMAGE_NAME:$(git rev-parse HEAD|cut -b 1-9) .
+                    environmentVariables:
+                      - name: IMAGE_NAME
+                        type: String
+                        value: <+input>
+                    outputVariables: []
+                  timeout: 10m
+              - step:
+                  type: ShellScript
+                  name: dbChanges
+                  identifier: dbChanges
+                  spec:
+                    shell: Bash
+                    executionTarget:
+                      host: <+input>
+                      connectorRef: testsshnew
+                      workingDirectory: /home/ec2-user/APP
+                    source:
+                      type: Inline
+                      spec:
+                        script: |-
+                          if ls /home/ec2-user/APP 
+                          then
+                          cd /home/ec2-user/APP && git pull origin main --rebase
+                          else
+                          git clone $GITHUB_REPO APP
+                          fi
+
+                          bash script.sh Lbase_update
+                    environmentVariables:
+                      - name: LBASE_JDBC
+                        type: String
+                        value: <+input>
+                      - name: GITHUB_REPO
+                        type: String
+                        value: <+input>
+                      - name: LBASE_PWORD
+                        type: Secret
+                        value: LBASE_PWORD
+                      - name: LBASE_UNAME
+                        type: String
+                        value: <+input>
+                      - name: LBASE_CHANGELOGFILE
+                        type: String
+                        value: <+input>
+                      - name: LBASE_LOGFILE
+                        type: String
+                        value: <+input>
+                    outputVariables: []
+                  timeout: 10m
+              - step:
+                  type: ShellScript
+                  name: Deploy
+                  identifier: Deploy
+                  spec:
+                    shell: Bash
+                    executionTarget:
+                      host: <+input>
+                      connectorRef: testsshnew
+                      workingDirectory: /home/ec2-user/APP
+                    source:
+                      type: Inline
+                      spec:
+                        script: bash script.sh deploy
+                    environmentVariables:
+                      - name: IMAGE_NAME
+                        type: String
+                        value: <+input>
+                    outputVariables: []
+                  timeout: 10m
+              - step:
+                  type: ShellScript
+                  name: Test
+                  identifier: Test
+                  spec:
+                    shell: Bash
+                    executionTarget:
+                      host: <+input>
+                      connectorRef: testsshnew
+                      workingDirectory: /home/ec2-user/APP
+                    source:
+                      type: Inline
+                      spec:
+                        script: bash script.sh SanityCheck
+                    environmentVariables:
+                      - name: IMAGE_NAME
+                        type: String
+                        value: <+input>
+                    outputVariables: []
+                  timeout: 10m
+              - step:
+                  type: Email
+                  name: Notify
+                  identifier: Email_1
+                  spec:
+                    to: faizii.official@gmail.com
+                    cc: ""
+                    subject: Success Deploy
+                    body: |-
+                      Success Deploy
+
+                      Regards
+                      CD
+                  timeout: 10m
+            rollbackSteps:
+              - step:
+                  type: ShellScript
+                  name: Liquibase_rollback
+                  identifier: Liquibase_rollback
+                  spec:
+                    shell: Bash
+                    executionTarget:
+                      host: <+input>
+                      connectorRef: testsshnew
+                      workingDirectory: /home/ec2-user/APP
+                    source:
+                      type: Inline
+                      spec:
+                        script: bash script.sh Lbase_rollback
+                    environmentVariables:
+                      - name: LBASE_JDBC
+                        type: String
+                        value: <+input>
+                      - name: GITHUB_REPO
+                        type: String
+                        value: <+input>
+                      - name: LBASE_PWORD
+                        type: Secret
+                        value: LBASE_PWORD
+                      - name: LBASE_UNAME
+                        type: String
+                        value: <+input>
+                      - name: LBASE_CHANGELOGFILE
+                        type: String
+                        value: <+input>
+                      - name: LBASE_LOGFILE
+                        type: String
+                        value: <+input>
+                    outputVariables: []
+              - step:
+                  type: ShellScript
+                  name: APPD_rollback
+                  identifier: APPD_rollback
+                  spec:
+                    shell: Bash
+                    executionTarget:
+                      host: <+input>
+                      connectorRef: testsshnew
+                      workingDirectory: /home/ec2-user/APP
+                    source:
+                      type: Inline
+                      spec:
+                        script: bash script.sh rollback
+                    outputVariables: []
+                  timeout: 10m
+              - step:
+                  type: Email
+                  name: Notify
+                  identifier: Notify
+                  spec:
+                    to: faizii.official@gmail.com
+                    cc: ""
+                    subject: Failed Deploy
+                    body: |-
+                      Deploy FAILED
+
+                      Regards
+                      CD
+                  timeout: 10m
+        tags: {}
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: StageRollback
+        delegateSelectors:
+          - docker-delegate
+        when:
+          pipelineStatus: Success
+        strategy:
+          repeat:
+            items:
+              - 3.84.50.42
