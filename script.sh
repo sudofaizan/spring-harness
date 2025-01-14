@@ -23,6 +23,44 @@ fi
 function clean(){
     mvn clean
 }
+function Lbase_update(){
+    
+    export PREV_TAG=$(git rev-parse HEAD|cut -b 1-9)
+
+    if liquibase tag --tag=$PREV_TAG --username=$LBASE_UNAME --url="$LBASE_JDBC"  --password=$LBASE_PWORD 
+    then
+    echo "Current DB is tagged with $PREV_TAG"
+    return 0
+    else
+    echo "error tagging DB $PREV_TAG"
+    return 1
+    fi
+
+
+    if liquibase update --username=$LBASE_UNAME --url="$LBASE_JDBC"  --password=$LBASE_PWORD --outputFile=$LBASE_LOGFILE --changeLogFile=$LBASE_CHANGELOGFILE
+    then
+    echo "Successfully updated DB"
+    return 0
+    else
+    echo "error Updating DB"
+    return 1
+    fi
+    
+    
+
+}
+function Lbase_rollback(){
+    # liquibase rollback --tag=$LBASE_TAG --username=$LBASE_UNAME --url="jdbc:mysql://localhost:3306/my_database"  --password=mysql --outputFile=liquibase.log
+    if liquibase rollback --tag=$PREV_TAG --username=$LBASE_UNAME --url="$LBASE_JDBC"  --password=$LBASE_PWORD --changeLogFile=$LBASE_CHANGELOGFILE
+    then
+    echo "Successfully rollback to $PREV_TAG"
+    return 0
+    else
+    echo "error Rollback to $PREV_TAG"
+    return 1
+    fi
+    
+}
 function check_space(){
      AVALIABLE_SPACE=$(df -h|grep -w "/"|awk '{print $2}'|sed 's/Gi//g')
      if [ $AVALIABLE_SPACE -le $CHECK_SPACE ]
