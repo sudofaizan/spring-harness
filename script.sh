@@ -27,7 +27,7 @@ function Lbase_update(){
     
     export PREV_TAG=$(git rev-parse HEAD|cut -b 1-9)
 
-    if liquibase tag --tag=$PREV_TAG --username=$LBASE_UNAME --url="$LBASE_JDBC"  --password=$LBASE_PWORD 
+    if liquibase --classpath="/home/ec2-user/APP/mysql-connector-j-9.1.0.jar"  tag --tag=$PREV_TAG --username=$LBASE_UNAME --url="$LBASE_JDBC"  --password=$LBASE_PWORD 
     then
     echo "Current DB is tagged with $PREV_TAG"
     return 0
@@ -37,7 +37,7 @@ function Lbase_update(){
     fi
 
 
-    if liquibase update --username=$LBASE_UNAME --url="$LBASE_JDBC"  --password=$LBASE_PWORD --outputFile=$LBASE_LOGFILE --changeLogFile=$LBASE_CHANGELOGFILE
+    if liquibase --classpath="/home/ec2-user/APP/mysql-connector-j-9.1.0.jar"  update --username=$LBASE_UNAME --url="$LBASE_JDBC"  --password=$LBASE_PWORD --outputFile=$LBASE_LOGFILE --changeLogFile=$LBASE_CHANGELOGFILE
     then
     echo "Successfully updated DB"
     return 0
@@ -50,8 +50,8 @@ function Lbase_update(){
 
 }
 function Lbase_rollback(){
-    # liquibase rollback --tag=$LBASE_TAG --username=$LBASE_UNAME --url="jdbc:mysql://localhost:3306/my_database"  --password=mysql --outputFile=liquibase.log
-    if liquibase rollback --tag=$PREV_TAG --username=$LBASE_UNAME --url="$LBASE_JDBC"  --password=$LBASE_PWORD --changeLogFile=$LBASE_CHANGELOGFILE
+    # liquibase --classpath="/home/ec2-user/APP/mysql-connector-j-9.1.0.jar"  rollback --tag=$LBASE_TAG --username=$LBASE_UNAME --url="jdbc:mysql://localhost:3306/my_database"  --password=mysql --outputFile=liquibase --classpath="/home/ec2-user/APP/mysql-connector-j-9.1.0.jar" .log
+    if liquibase --classpath="/home/ec2-user/APP/mysql-connector-j-9.1.0.jar"  rollback --tag=$PREV_TAG --username=$LBASE_UNAME --url="$LBASE_JDBC"  --password=$LBASE_PWORD --changeLogFile=$LBASE_CHANGELOGFILE
     then
     echo "Successfully rollback to $PREV_TAG"
     return 0
