@@ -76,8 +76,8 @@ function check_space(){
 }
 function rollback(){
 echo "rolling back"
-docker rm -f app
-docker run -itd --name app -p 80:8080 springboot:$(cat /home/ec2-user/OLD_TAG_DOCKER)
+docker rm -f app ||true
+docker run -itd --name app -p 80:8080 $(cat /home/ec2-user/OLD_TAG_DOCKER)
 }
 function deploy(){
     if [ -f /home/ec2-user/lock ]
