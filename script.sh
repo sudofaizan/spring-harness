@@ -25,7 +25,8 @@ function clean(){
 }
 function Lbase_update(){
     
-    export PREV_TAG=$(git rev-parse HEAD|cut -b 1-9)
+    git rev-parse HEAD|cut -b 1-9 >/home/ec2-user/PREV_TAG
+    export PREV_TAG=$(cat /home/ec2-user/PREV_TAG)
 
     if liquibase --classpath="/home/ec2-user/APP/mysql-connector-j-9.1.0.jar"  tag --tag=$PREV_TAG --username=$LBASE_UNAME --url="$LBASE_JDBC"  --password=$LBASE_PWORD 
     then
@@ -50,6 +51,7 @@ function Lbase_update(){
 
 }
 function Lbase_rollback(){
+    export PREV_TAG=$(cat /home/ec2-user/PREV_TAG)
     # liquibase --classpath="/home/ec2-user/APP/mysql-connector-j-9.1.0.jar"  rollback --tag=$LBASE_TAG --username=$LBASE_UNAME --url="jdbc:mysql://localhost:3306/my_database"  --password=mysql --outputFile=liquibase --classpath="/home/ec2-user/APP/mysql-connector-j-9.1.0.jar" .log
     if liquibase --classpath="/home/ec2-user/APP/mysql-connector-j-9.1.0.jar"  rollback --tag=$PREV_TAG --username=$LBASE_UNAME --url="$LBASE_JDBC"  --password=$LBASE_PWORD --changeLogFile=$LBASE_CHANGELOGFILE
     then
