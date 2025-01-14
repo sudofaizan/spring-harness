@@ -77,7 +77,7 @@ function check_space(){
 function rollback(){
 echo "rolling back"
 docker rm -f app
-docker run -itd --name app -p 80:8080 springboot:$(OLD_TAG)
+docker run -itd --name app -p 80:8080 springboot:$(cat /home/ec2-user/OLD_TAG_DOCKER)
 }
 function deploy(){
     if [ -f /home/ec2-user/lock ]
@@ -91,6 +91,7 @@ function deploy(){
     docker build -t springboot:$TAG .
     export OLD_TAG=$(docker ps -a |grep app|awk '{print $2}')
     old_tag=$(docker ps -a |grep app|awk '{print $2}')
+    docker ps -a |grep app|awk '{print $2}' >/home/ec2-user/OLD_TAG_DOCKER
     echo "old tag is $OLD_TAG"
     docker rm -f app
     echo "docker cmd"
