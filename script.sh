@@ -24,7 +24,7 @@ function clean(){
     mvn clean
 }
 function Lbase_update(){
-    CURR_DB_HASH=$(cat LQ_BASE/*|shasum|awk '{print $1}')
+    CURR_DB_HASH=$(cat LQ_BASE/*|sha256sum|awk '{print $1}')
     PREV_DB_HASH=$(cat /home/ec2-user/PREV_DB_HASH)
 
     echo "Prev DB Schema change hash is $PREV_DB_HASH and current hash is $CURR_DB_HASH"
