@@ -24,7 +24,17 @@ function clean(){
     mvn clean
 }
 function Lbase_update(){
-    
+    CURR_DB_HASH=$(cat LQ_BASE/*|shasum|awk '{print $1}')
+    PREV_DB_HASH=$(cat /home/ec2-user/PREV_DB_HASH)
+
+    echo "Prev DB Schema change hash is $PREV_DB_HASH and current hash is $CURR_DB_HASH"
+
+    if [ "$PREV_DB_HASH" == "$CURR_DB_HASH" ]
+    then
+    echo "No change in DB Schema, Skipping step"
+    exit 0
+    fi
+
     git rev-parse HEAD|cut -b 1-9 >/home/ec2-user/PREV_TAG
     export PREV_TAG=$(cat /home/ec2-user/PREV_TAG)
 
@@ -47,6 +57,7 @@ function Lbase_update(){
     return 1
     fi
     
+    echo $CURR_DB_HASH >/home/ec2-user/PREV_DB_HASH
     
 
 }
